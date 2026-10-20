@@ -1,0 +1,21 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+    aliases {
+        led0 = &debug_led;
+    };
+
+    /* Extend the existing stm32f4_disco 'leds' node. */
+    leds {
+        compatible = "gpio-leds";
+
+        debug_led: debug_led {
+            gpios = <&gpioe 4 GPIO_ACTIVE_HIGH>;
+            label = "Debug LED PE4";
+        };
+    };
+};
+
+&gpioe {
+    status = "okay";
+};

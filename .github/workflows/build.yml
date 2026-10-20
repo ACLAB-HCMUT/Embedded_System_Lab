@@ -1,0 +1,50 @@
+name: Build Zephyr STM32F4 PE4 Lab
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout application
+        uses: actions/checkout@v4
+        with:
+          path: app
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Zephyr workspace and ARM toolchain
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: app
+          toolchains: arm-zephyr-eabi
+
+      - name: Build STM32F4 Discovery firmware
+        run: west build -p always -b stm32f4_disco app -d build
+
+      - name: Check generated firmware files
+        run: |
+          test -s build/zephyr/zephyr.elf
+          test -s build/zephyr/zephyr.hex
+          test -s build/zephyr/zephyr.bin
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stm32f4-disco-pe4-firmware
+          path: |
+            build/zephyr/zephyr.elf
+            build/zephyr/zephyr.hex
+            build/zephyr/zephyr.bin
+            build/zephyr/zephyr.dts
+          if-no-files-found: error
